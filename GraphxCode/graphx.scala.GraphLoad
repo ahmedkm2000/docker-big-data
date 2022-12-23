@@ -1,0 +1,26 @@
+import org.apache.spark.graphx.GraphLoader
+import org.apache.spark.sql.{SaveMode, SparkSession}
+
+/*val spark = SparkSession.builder().getOrCreate()
+var result = spark.read.format("org.neo4j.spark.DataSource") 
+  .option("url", "bolt://192.168.0.116:7687")
+  .option("authentication.type", "basic")
+  .option("authentication.basic.username", "neo4j")
+  .option("authentication.basic.password", "ahmed")
+  .option("query", "MATCH (n:facebook) RETURN n.ab")
+  .load()
+
+result.write.text("file:/opt/zeppelin/textfile.txt")*/
+val graph = GraphLoader.edgeListFile(sc,"file:/opt/zeppelin/textfile.txt")
+
+val ranks = graph.pageRank(0.0001).vertices
+// Join the ranks with the usernames
+val users = sc.textFile("file:/opt/zeppelin/textfile.txt").map { line =>
+  val fields = line.split("")
+  (fields(0).toLong, fields(1))
+}
+val ranksByUsername = users.join(ranks).map {
+  case (id, (username, rank)) => (username, rank)
+}
+// Print the result
+println(ranksByUsername.collect().mkString("\n"))

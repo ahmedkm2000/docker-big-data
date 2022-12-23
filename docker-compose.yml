@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  zeppelin:
+    image: apache/zeppelin:0.9.0
+    environment:
+      - ZEPPELIN_LOG_DIR=/logs
+      - ZEPPELIN_NOTEBOOK_DIR=/notebook
+    ports:
+      - 8080:8080
+    volumes: # to persist our data once we've destroyed our containers
+      - ./notebook:/notebook
+      - ./logs:/logs
+  neo4j:
+    image: neo4j:4.4.16
+    volumes: # to persist our data once we've destroyed our containers
+      - $HOME/neo4j/data:/data
+    ports:
+      - "7474:7474"
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    volumes:
+      - namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop-hive.env
+    ports:
+      - "50070:50070"
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+    volumes:
+      - datanode:/hadoop/dfs/data
+    env_file:
+      - ./hadoop-hive.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:50070"
+    ports:
+      - "50075:50075"
+
+ 

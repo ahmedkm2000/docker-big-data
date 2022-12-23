@@ -1,0 +1,17 @@
+1. import
+LOAD CSV WITH HEADERS FROM "file:///facebook.csv" AS csvLine
+CREATE (f:following {id: toInteger(csvLine.id)}),(r:followers {id: toInteger(csvLine.Number)})
+CREATE (f)-[:follow]->(r)
+2. create
+CREATE (f:following {id:'5000'}),(r:followers {id:'5001' })
+CREATE (f)-[:follow]->(r)
+3. select
+MATCH (f:following)-[:follow]-(followers)
+WHERE f.id = '5000' RETURN f.id, followers.id
+4.update
+MATCH (f:following {id: '5000'})
+SET f.id = '50001'
+RETURN f
+5. delete
+MATCH (f:following {id: '5001'})
+DELETE f
